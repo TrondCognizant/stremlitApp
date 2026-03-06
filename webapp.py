@@ -31,7 +31,6 @@ data = data_full.iloc[-1*interval_days:]
     
 # Fetch data button
 if st.sidebar.button("Fetch Data"):
-    with st.spinner(f'Fetching data for {ticker}...'):
 
     if not data_full.empty:
         st.subheader(f"{ticker.upper()} - Last {interval_days} Days")
@@ -58,15 +57,13 @@ if st.sidebar.button("Fetch Data"):
         
         # Show plot
         st.plotly_chart(fig, use_container_width=True)
-        
+    
         # Optional: Show raw data
         with st.expander("View Raw Data"):
             st.write(data)
-            
+        
     else:
         st.error("No data found. Please check the ticker symbol.")
                 
-
-
 else:
     st.info("Enter a ticker in the sidebar and click 'Fetch Data'.")
