@@ -33,9 +33,7 @@ data = data_full.iloc[-1*interval_days:]
 if st.sidebar.button("Fetch Data"):
     with st.spinner(f'Fetching data for {ticker}...'):
 
-
-    
-    if not data.empty:
+    if not data_full.empty:
         st.subheader(f"{ticker.upper()} - Last {interval_days} Days")
         
         # Create Candlestick chart
