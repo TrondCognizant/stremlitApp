@@ -29,12 +29,13 @@ except Exception as e:
 
 
 interval_days = st.slider("Select the time interval (days]", min_value=5, max_value=max_value, value=30)
-data = data_full.iloc[-1*interval_days:]
+
     
 # Fetch data button
 if st.sidebar.button("Fetch Data"):
-    with st.expander("View Raw Data"):       
-        if not data_full.empty:
+    with st.spinner(f'Fetching data for {ticker}...'): 
+        data = data_full.iloc[-1*interval_days:]
+        if not data.empty:
             st.subheader(f"{ticker.upper()} - Last {interval_days} Days")
             
             # Create Candlestick chart
@@ -63,7 +64,6 @@ if st.sidebar.button("Fetch Data"):
          # Optional: Show raw data
             st.write(data)
 
-        
         else:
             st.error("No data found. Please check the ticker symbol.")           
 else:
