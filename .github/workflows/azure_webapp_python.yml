@@ -1,7 +1,10 @@
 name: Build and deploy Python app to Azure Web App
 env:
-  AZURE_WEBAPP_NAME: MY_WEBAPP_NAME   # <-- replace with your Azure Web App name
-  PYTHON_VERSION: '3.8'               # <-- change if needed
+  # Step 1: Create Azure Web App
+  # Create a new "Web App" resource
+  # Choose Runtime stack: Python 3.11 or 3.12
+  AZURE_WEBAPP_NAME: webapp-python-694450  # <-- replace with your Azure Web App name
+  PYTHON_VERSION: '3.12'               # <-- change if needed
 on:
   push:
     branches:
