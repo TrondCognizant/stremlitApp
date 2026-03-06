@@ -1,3 +1,5 @@
+import re
+
 import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
@@ -14,7 +16,7 @@ ticker = st.sidebar.text_input("Enter Stock Ticker", value="AAPL")
 
 # Define time range (Previous Month)
 end_date = datetime.now()
-interval_days  = 20
+interval_days = 20
 start_date = end_date - timedelta(days=interval_days)
 
 # Fetch data button
@@ -22,7 +24,7 @@ if st.sidebar.button("Fetch Data"):
     with st.spinner(f'Fetching data for {ticker}...'):
         try:
             # Download data
-            data = yf.download(ticker, start=start_date, end=end_date)
+            data = yf.download(ticker, start=start_date, end=end_date).swaplevel(axis='columns')[ticker]
             
             if not data.empty:
                 st.subheader(f"{ticker.upper()} - Last {interval_days} Days")
@@ -48,7 +50,7 @@ if st.sidebar.button("Fetch Data"):
                 )
                 
                 # Show plot
-                st.plotly_chart(fig)#, use_container_width=True, render_mode="svg")
+                st.plotly_chart(fig, use_container_width=True)
                 
                 # Optional: Show raw data
                 with st.expander("View Raw Data"):
