@@ -14,7 +14,8 @@ ticker = st.sidebar.text_input("Enter Stock Ticker", value="AAPL")
 
 # Define time range (Previous Month)
 end_date = datetime.now()
-start_date = end_date - timedelta(days=30)
+interval_days  = 20
+start_date = end_date - timedelta(days=interval_days)
 
 # Fetch data button
 if st.sidebar.button("Fetch Data"):
@@ -24,7 +25,7 @@ if st.sidebar.button("Fetch Data"):
             data = yf.download(ticker, start=start_date, end=end_date)
             
             if not data.empty:
-                st.subheader(f"{ticker.upper()} - Last 30 Days")
+                st.subheader(f"{ticker.upper()} - Last {interval_days} Days")
                 
                 # Create Candlestick chart
                 fig = go.Figure(data=[go.Candlestick(
