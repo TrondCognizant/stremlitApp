@@ -47,7 +47,7 @@ if st.sidebar.button("Fetch Data"):
                 )
                 
                 # Show plot
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig)#, use_container_width=True, render_mode="svg")
                 
                 # Optional: Show raw data
                 with st.expander("View Raw Data"):
