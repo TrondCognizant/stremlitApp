@@ -14,9 +14,11 @@ st.title("📈 Previous Month Stock Price Candlestick Chart")
 st.sidebar.header("User Input")
 ticker = st.sidebar.text_input("Enter Stock Ticker", value="AAPL")
 
+# Choose interval length
+interval_days = st.slider("Select the time interval (days]", min_value=5, max_value=60, value=30)
+
 # Define time range (Previous Month)
 end_date = datetime.now()
-interval_days = 20
 start_date = end_date - timedelta(days=interval_days)
 
 # Fetch data button
