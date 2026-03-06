@@ -15,54 +15,60 @@ st.sidebar.header("User Input")
 ticker = st.sidebar.text_input("Enter Stock Ticker", value="AAPL")
 
 # Choose interval length
-interval_days = st.slider("Select the time interval (days]", min_value=5, max_value=60, value=30)
-
+max_value=60
+try:
+    # Download data
+    data_full = yf.download(ticker, start=start_date, end=end_date).swaplevel(axis='columns')[ticker]
+except Exception as e:
+    st.error(f"An error occurred: {e}")
+    
 # Define time range (Previous Month)
 end_date = datetime.now()
-start_date = end_date - timedelta(days=interval_days)
+start_date = end_date - timedelta(days=max_value)
 
+interval_days = st.slider("Select the time interval (days]", min_value=5, max_value=max_value, value=30)
+data = data_full.iloc[-1*interval_days:]
+    
 # Fetch data button
 if st.sidebar.button("Fetch Data"):
     with st.spinner(f'Fetching data for {ticker}...'):
-        try:
-            # Download data
-            data = yf.download(ticker, start=start_date, end=end_date).swaplevel(axis='columns')[ticker]
+
+
+    
+    if not data.empty:
+        st.subheader(f"{ticker.upper()} - Last {interval_days} Days")
+        
+        # Create Candlestick chart
+        fig = go.Figure(data=[go.Candlestick(
+            x=data.index,
+            open=data['Open'],
+            high=data['High'],
+            low=data['Low'],
+            close=data['Close'],
+            name=ticker
+        )])
+        
+        # Customize layout
+        fig.update_layout(
+            title=f"{ticker.upper()} Price (Previous Month)",
+            yaxis_title="Price (USD)",
+            xaxis_title="Date",
+            xaxis_rangeslider_visible=False,
+            template="plotly_dark",
+            height=600
+        )
+        
+        # Show plot
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Optional: Show raw data
+        with st.expander("View Raw Data"):
+            st.write(data)
             
-            if not data.empty:
-                st.subheader(f"{ticker.upper()} - Last {interval_days} Days")
+    else:
+        st.error("No data found. Please check the ticker symbol.")
                 
-                # Create Candlestick chart
-                fig = go.Figure(data=[go.Candlestick(
-                    x=data.index,
-                    open=data['Open'],
-                    high=data['High'],
-                    low=data['Low'],
-                    close=data['Close'],
-                    name=ticker
-                )])
-                
-                # Customize layout
-                fig.update_layout(
-                    title=f"{ticker.upper()} Price (Previous Month)",
-                    yaxis_title="Price (USD)",
-                    xaxis_title="Date",
-                    xaxis_rangeslider_visible=False,
-                    template="plotly_dark",
-                    height=600
-                )
-                
-                # Show plot
-                st.plotly_chart(fig, use_container_width=True)
-                
-                # Optional: Show raw data
-                with st.expander("View Raw Data"):
-                    st.write(data)
-                    
-            else:
-                st.error("No data found. Please check the ticker symbol.")
-                
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+
 
 else:
     st.info("Enter a ticker in the sidebar and click 'Fetch Data'.")
