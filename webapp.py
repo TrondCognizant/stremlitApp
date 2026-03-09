@@ -27,14 +27,7 @@ except Exception as e:
     st.error(f"An error occurred: {e}")
     
 interval_days = st.slider("Select the time interval (days]", min_value=5, max_value=max_value, value=30)
-    
-st.title("Stock Data Analysis")
-df = load_stock_data()
-
-if not df.empty:
-    st.write("Preview of Stock Data:", df.head())
-    st.line_chart(df.set_index('Date')['Close'])
-    
+        
     
 # Fetch data button
 with st.spinner(f'Fetching data for {ticker}...'): 
@@ -65,8 +58,16 @@ with st.spinner(f'Fetching data for {ticker}...'):
         st.plotly_chart(fig, use_container_width=True)
         if st.sidebar.button("Show data frame"):
             # Optional: Show raw data
-            st.write(data)
+            st.write(data) 
 
     else:
         st.error("No data found. Please check the ticker symbol.")           
 
+
+st.title("Load Historic Stock Data Analysis")
+df_loaded = load_stock_data()
+
+if not df_loaded.empty:
+    st.write("Preview of Stock Data")
+    st.write(df_loaded[ticker.upper].tail())
+    #st.line_chart(df.set_index('Date')['Close'])
