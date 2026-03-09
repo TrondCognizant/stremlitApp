@@ -3,3 +3,5 @@ pandas
 yfinance 
 plotly
 streamlit
+azure.identity
+azure.storage.blob

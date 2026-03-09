@@ -4,7 +4,7 @@ import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-
+from read_data import load_stock_data
 
 # Set page config
 st.set_page_config(layout="wide")
@@ -28,8 +28,15 @@ except Exception as e:
     
 interval_days = st.slider("Select the time interval (days]", min_value=5, max_value=max_value, value=30)
     
-# Fetch data button
+st.title("Stock Data Analysis")
+df = load_stock_data()
 
+if not df.empty:
+    st.write("Preview of Stock Data:", df.head())
+    st.line_chart(df.set_index('Date')['Close'])
+    
+    
+# Fetch data button
 with st.spinner(f'Fetching data for {ticker}...'): 
     data = data_full.iloc[-1*interval_days:]
     if not data.empty:
