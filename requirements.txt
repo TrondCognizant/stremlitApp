@@ -5,3 +5,5 @@ plotly
 streamlit
 azure.identity
 azure.storage.blob
+yfinance
+st-pages
