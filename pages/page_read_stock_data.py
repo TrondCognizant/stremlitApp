@@ -8,22 +8,21 @@ from read_data import load_stock_data
 
 st.title("📈 Previous Month Stock Price Candlestick Chart")
 
-# Sidebar for user input
-st.sidebar.header("User Input")
-ticker = st.sidebar.text_input("Enter Stock Ticker", value="AAPL")
+ticker = st.text_input("Enter Stock Ticker", value="Select")
 
 # Choose interval length
 max_value=60
 end_date = datetime.now()
 start_date = end_date - timedelta(days=max_value)
 
-try:
-    # Download data
-    data_full = yf.download(ticker, start=start_date, end=end_date).swaplevel(axis='columns')[ticker]
-except Exception as e:
-    st.error(f"An error occurred: {e}")
-    
-interval_days = st.slider("Select the time interval (days]", min_value=5, max_value=max_value, value=30)      
+if ticker != "Select":
+    try:
+        # Download data
+        data_full = yf.download(ticker, start=start_date, end=end_date).swaplevel(axis='columns')[ticker]
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        
+interval_days = st.slider("Select the time interval [days]", min_value=5, max_value=max_value, value=30)      
     
 # Fetch data button
 with st.spinner(f'Fetching data for {ticker}...'): 
@@ -52,16 +51,9 @@ with st.spinner(f'Fetching data for {ticker}...'):
         )
         # Show plot
         st.plotly_chart(fig, use_container_width=True)
+        
         if st.sidebar.button("Show data frame"):
             # Optional: Show raw data
             st.write(data) 
     else:
         st.error("No data found. Please check the ticker symbol.")           
-
-st.title("Load Historic Stock Data")
-df_loaded = load_stock_data()
-
-if not df_loaded.empty:
-    st.write("Preview of Stock Data")
-    st.write(df_loaded[ticker.upper()].tail())
-    #st.line_chart(df.set_index('Date')['Close'])
