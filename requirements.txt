@@ -3,7 +3,7 @@ pandas
 yfinance 
 plotly
 streamlit
+st-pages=0.1.1
 azure.identity
 azure.storage.blob
 yfinance
-st-pages
