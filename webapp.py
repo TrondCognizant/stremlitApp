@@ -6,13 +6,14 @@ import streamlit as st
 #st.markdown("### **Homepage of stockdata processing **")
 #st.info("⬅️ Now you can start navigating the tabs in the left-panel menu")
 
-read_write_data = st.Page("pages/page_read_stock_data.py", title="Get Data")
+get_live_data = st.Page("pages/page_read_stock_data.py")
+get_data_from_blob = st.Page("pages/page_read_stock_data.py")
 
 # pg = st.navigation([read_write_data])
 pg = st.navigation(
     {
-        "Get Stock Data": [read_write_data],
-         "Get Stock Data2": [read_write_data],
+        "Get Live Data": [get_live_data],
+        "Get Data from Blob": [get_data_from_blob]
     }
 )
 pg.run()
