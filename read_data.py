@@ -37,13 +37,8 @@ def load_stock_data():
 # Would you like me to help you set up the Environment Variables in your Azure Web App so your Streamlit code can connect to the storage safely?
 
 
-def update_and_save_to_azure(
-    connection_string, 
-    container_name, 
-    blob_name, 
-    batch_size=30, 
-    pause_seconds=2
-):
+def update_and_save_to_azure(container_name, blob_name, batch_size=30, pause_seconds=2):
+    
     # 1. Initialize Azure Client & Download existing data
     credential = DefaultAzureCredential()
     blob_service_client = BlobServiceClient(account_url, credential=credential)
@@ -60,7 +55,7 @@ def update_and_save_to_azure(
     end_date = pd.Timestamp.today()
 
     if start_date >= end_date:
-        print("Data is already up to date.")
+        st.warning("Data is already up to date.")
         return df
 
     # 3. Batch processing to avoid yfinance limits
