@@ -1,6 +1,7 @@
 
 from read_data import load_stock_data
 import streamlit as st
+import plotly.graph_objects as go
 
 st.title("Load Historic Stock Data")
 df_loaded = load_stock_data()
