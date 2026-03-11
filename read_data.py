@@ -10,7 +10,8 @@ import gc # garbage collection
 # Setup connection (Use environment variables for production!)
 account_url = "https://genaitraining68696287510.blob.core.windows.net"
 container_name = "stock-data"
-blob_name = "Etoro_2000_14mar2025.parquet" # Or prices.csv
+blob_name = "Etoro_2000_14mar2025_2025-03-18_to_2026-03-11.parquet"
+# blob_name = "Etoro_2000_14mar2025.parquet" # Or prices.csv
 
 @st.cache_data
 def load_stock_data():
@@ -38,7 +39,7 @@ def load_stock_data():
 # Would you like me to help you set up the Environment Variables in your Azure Web App so your Streamlit code can connect to the storage safely?
 
 
-def update_and_save_to_azure(container_name, original_blob_name, batch_size=30, pause_seconds=2):
+def update_and_save_to_azure(batch_size=30, pause_seconds=2) # container_name, original_blob_name,):
     credential = DefaultAzureCredential()
     blob_service_client = BlobServiceClient(account_url, credential=credential)
     source_blob_client = blob_service_client.get_blob_client(container=container_name, blob=original_blob_name)
