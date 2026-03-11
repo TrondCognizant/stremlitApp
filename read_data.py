@@ -57,12 +57,14 @@ def update_and_save_to_azure(container_name, blob_name, batch_size=30, pause_sec
     if start_date >= end_date:
         st.warning("Data is already up to date.")
         return df
-
+    
     # 3. Batch processing to avoid yfinance limits
     new_data_frames = []
+    
     for i in range(0, len(all_tickers), batch_size):
         batch = all_tickers[i:i + batch_size]
-        print(f"Fetching batch {i//batch_size + 1}: {len(batch)} tickers...")
+        # with st.status("Analyzing Market Data...", expanded=True) as status:
+        st.write(f"Fetching ticker symbols {batch}")
         
         try:
             # Download batch
@@ -72,6 +74,9 @@ def update_and_save_to_azure(container_name, blob_name, batch_size=30, pause_sec
                 # Align MultiIndex to match your storage format (Metric, Ticker) or (Ticker, Metric)
                 # yf.download(group_by='ticker') returns (Ticker, Metric)
                 new_data_frames.append(batch_df)
+            else:
+                st.write(f"Batch data frame is empty, pausing for {pause_seconds} minutes")
+                time.sleep(pause_seconds*60)
             
             # Respectful pause to prevent IP blocking
             time.sleep(pause_seconds)
