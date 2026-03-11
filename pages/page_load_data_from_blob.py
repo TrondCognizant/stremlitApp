@@ -5,9 +5,9 @@ import streamlit as st
 st.title("Load Historic Stock Data")
 df_loaded = load_stock_data()
 
-ticker = st.text_input("Enter Stock Ticker", value="Select")
+ticker = st.text_input("Enter Stock Ticker", value="Select ticker")
 
-if (ticker != "Select"):
+if (ticker != "Select ticker"):
     st.write("Preview of Stock Data")
     st.write(df_loaded[ticker.upper()].tail())
     #st.line_chart(df.set_index('Date')['Close'])

@@ -39,10 +39,10 @@ def load_stock_data():
 # Would you like me to help you set up the Environment Variables in your Azure Web App so your Streamlit code can connect to the storage safely?
 
 
-def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, original_blob_name,):
+def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, blob_name,):
     credential = DefaultAzureCredential()
     blob_service_client = BlobServiceClient(account_url, credential=credential)
-    source_blob_client = blob_service_client.get_blob_client(container=container_name, blob=original_blob_name)
+    source_blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
 
     # --- PHASE 1: Metadata Extraction ---
     st.info("Extracting metadata from source...")
@@ -106,7 +106,7 @@ def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, 
     gc.collect()
 
     # --- PHASE 4: Filename Generation & Upload ---
-    clean_name = original_blob_name.replace(".parquet", "")
+    clean_name = blob_name.replace(".parquet", "")
     date_suffix = f"{start_date.strftime('%Y-%m-%d')}_to_{end_date.strftime('%Y-%m-%d')}"
     new_blob_name = f"{clean_name}_{date_suffix}.parquet"
 

@@ -8,14 +8,14 @@ from read_data import load_stock_data
 
 st.title("📈 Previous Month Stock Price Candlestick Chart")
 
-ticker = st.text_input("Enter Stock Ticker", value="Select")
+ticker = st.text_input("Enter Stock Ticker", value="Select ticker")
 
 # Choose interval length
 max_value=60
 end_date = datetime.now()
 start_date = end_date - timedelta(days=max_value)
 
-if ticker != "Select":
+if ticker != "Select ticker":
     try:
         # Download data
         data_full = yf.download(ticker, start=start_date, end=end_date).swaplevel(axis='columns')[ticker]
