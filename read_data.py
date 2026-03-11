@@ -39,7 +39,7 @@ def load_stock_data():
 # Would you like me to help you set up the Environment Variables in your Azure Web App so your Streamlit code can connect to the storage safely?
 
 
-def update_and_save_to_azure(batch_size=30, pause_seconds=2) # container_name, original_blob_name,):
+def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, original_blob_name,):
     credential = DefaultAzureCredential()
     blob_service_client = BlobServiceClient(account_url, credential=credential)
     source_blob_client = blob_service_client.get_blob_client(container=container_name, blob=original_blob_name)
