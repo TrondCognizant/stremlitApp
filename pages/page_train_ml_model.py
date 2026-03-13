@@ -17,7 +17,7 @@ ml_client = MLClient(DefaultAzureCredential(),
                      )
 
 st.title("ML Control Center")
-lr = st.slider("Learning Rate", 0.01, 0.5)
+hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
 
 # 1. Get the absolute path of the directory where your Web App code lives
 # In Azure Web Apps, this is usually /home/site/wwwroot
@@ -28,7 +28,7 @@ if st.button("Start Training Job"):
     # 2. Define the training task
     job = command(
         code=code_dir, 
-        command="python lstm_train.py --lr ${{inputs.learning_rate}}",
+        command="python lstm_train.py --lr ${{hidden_nodes}}",
         inputs={"learning_rate": lr},
         environment="AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
         compute=compute
