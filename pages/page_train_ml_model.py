@@ -23,7 +23,7 @@ lr = st.slider("Learning Rate", 0.01, 0.5)
 # In Azure Web Apps, this is usually /home/site/wwwroot
 base_dir = os.path.abspath(os.path.dirname(__file__))
 code_dir = os.path.join(base_dir, "src")
-
+st.write(f"Code_dir content: {os.listdir(code_dir)}")
 if st.button("Start Training Job"):
     # 2. Define the training task
     job = command(
