@@ -3,7 +3,7 @@ import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-from read_data import load_stock_data
+from src.read_data import load_stock_data
 
 
 st.title("📈 Previous Month Stock Price Candlestick Chart")
