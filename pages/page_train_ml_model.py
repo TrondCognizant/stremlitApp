@@ -23,12 +23,12 @@ hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
 # In Azure Web Apps, this is usually /home/site/wwwroot
 base_dir = os.path.abspath(os.path.dirname(__file__))
 code_dir = os.path.join(base_dir, "src")
-st.write(f"Code_dir content: {os.listdir(code_dir)}")
+# st.write(f"Code_dir content: {os.listdir(code_dir)}")
 if st.button("Start Training Job"):
     # 2. Define the training task
     job = command(
         code=code_dir, 
-        command="python lstm_train.py --lr ${{inputs.hidden_nodes}}",
+        command="python train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
         inputs={"hidden_nodes": hidden_nodes},
         environment="AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
         compute=compute
