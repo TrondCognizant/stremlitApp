@@ -2,6 +2,7 @@ from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
 import streamlit as st
 import os
+import time
 
 
 subscription_id= "d2bda5a8-0cf7-480c-bf1f-6d7ec7b665ba"
@@ -21,15 +22,26 @@ hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
 
 # 1. Get the absolute path of the directory where your Web App code lives
 # In Azure Web Apps, this is usually /home/site/wwwroot
-base_dir = os.path.abspath(os.path.dirname(__file__))
-code_dir = os.path.join(base_dir, "src")
+#base_dir = os.path.abspath(os.path.dirname(__file__))
+#code_dir = os.path.join(base_dir, "src")
+
+# Use the environment variable Azure sets for the root of the site
+site_root = os.environ.get("HOME", "/home") + "/site/wwwroot"
+code_dir = os.path.join(site_root, "src")
+
+if not os.path.exists(code_dir):
+    # Fallback for local testing
+    code_dir = os.path.abspath("./src")
+
+st.write(f"Uploading code from: {code_dir}")
 # st.write(f"Code_dir content: {os.listdir(code_dir)}")
 if st.button("Start Training Job"):
     # 2. Define the training task
     job = command(
+        name=f"lstm-train-{int(time.time())}", # Add a unique name
         code=code_dir, 
-        command="python train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
         inputs={"hidden_nodes": hidden_nodes},
+        command="python train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
         environment="AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
         compute=compute
     )
