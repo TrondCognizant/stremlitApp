@@ -6,3 +6,6 @@ tensorflow
 scikit-learn
 joblib
 mlflow
+azure.storage.blob 
+azure.identity 
+streamlit
