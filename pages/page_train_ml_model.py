@@ -22,12 +22,12 @@ hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
 
 # 1. Get the absolute path of the directory where your Web App code lives
 # In Azure Web Apps, this is usually /home/site/wwwroot
-#base_dir = os.path.abspath(os.path.dirname(__file__))
-#code_dir = os.path.join(base_dir, "src")
+base_dir = os.path.abspath(os.path.dirname(__file__))
+code_dir = os.path.join(base_dir, "src")
 
-# Use the environment variable Azure sets for the root of the site
-site_root = os.environ.get("HOME", "/home") + "/site/wwwroot"
-code_dir = os.path.join(site_root, "src")
+# Use the environment variable Azure sets for the root of the site DID NOT WORK
+#site_root = os.environ.get("HOME", "/home") + "/site/wwwroot"
+#code_dir = os.path.join(site_root, "src")
 
 if not os.path.exists(code_dir):
     # Fallback for local testing
