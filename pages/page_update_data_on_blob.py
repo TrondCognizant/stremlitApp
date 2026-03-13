@@ -1,4 +1,4 @@
-from src.read_data import update_and_save_to_azure
+from pages.src.read_data import update_and_save_to_azure
 import streamlit as st
 
 # Setup connection (Use environment variables for production!)

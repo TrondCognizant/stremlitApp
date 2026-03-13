@@ -1,5 +1,5 @@
 
-from src.read_data import load_stock_data
+from pages.src.read_data import load_stock_data
 import streamlit as st
 import plotly.graph_objects as go
 
