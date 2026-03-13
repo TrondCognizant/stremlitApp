@@ -7,7 +7,7 @@ root_path = os.path.abspath(os.path.dirname(__file__))
 st.write(f"root path: {root_path}")
 # Add it to sys.path if it's not already there
 if root_path not in sys.path:
-    st.write(f"{root_path} wa not in the system paths, but is now added")
+    # st.write(f"{root_path} wa not in the system paths, but is now added")
     sys.path.append(root_path)
 
 # Set page config
