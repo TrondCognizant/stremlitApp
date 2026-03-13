@@ -14,8 +14,6 @@ ticker = st.selectbox(
     placeholder="NVDA",
 )
 
-st.write(f"You selected: {ticker}")
-# ticker = st.text_input("Enter Stock Ticker", value="Select ticker")
 
 #if (ticker != "Select ticker"):
 #    st.write("Preview of Stock Data")
