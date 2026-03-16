@@ -72,7 +72,8 @@ def train_model(args):
     )
 
     # 6. Save the final model to outputs
-    model.save('outputs/lstm_model.h5')
+    # model.save('outputs/lstm_model.h5') Obsolete format
+    model.save(f"outputs/lstm_model{args}.keras")
 
 if __name__ == "__main__":
     # Define Argument Parser for Azure ML Command Line

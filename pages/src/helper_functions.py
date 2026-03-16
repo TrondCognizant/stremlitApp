@@ -1,4 +1,31 @@
+import pandas as pd
+import numpy as np
 
+def calculate_macd(df):
+    """returns a pandas series vector with the MACD diff (histogram) values
+    the input can be:
+    a pandas dataframe with column name 'Close' containing the closing prices
+    a pandas series vector, assumed to be the closing prices
+    a numpy array assumed to be the closing prices"""
+    if isinstance(df, pd.DataFrame):
+        Close = df.loc[:,'Close']
+    elif isinstance(df, pd.Series):
+        Close = df
+    elif isinstance(df, np.array):    
+        Close = pd.Series(df)
+
+    # Get the 12-day EMA of the closing price
+    k = Close.ewm(span=12, adjust=False, min_periods=12).mean()
+    # Get the 26-day EMA of the closing price
+    d = Close.ewm(span=26, adjust=False, min_periods=26).mean()
+    # Subtract the 26-day EMA from the 12-Day EMA to get the MACD
+    macd = k - d 
+    # Get the 9-Day EMA of the MACD for the Trigger line
+    signal = macd.ewm(span=9, adjust=False, min_periods=9).mean()
+    # Calculate the difference between the MACD - Trigger for the Convergence/Divergence value
+    macd_diff = macd - signal
+
+    return macd_diff
 
 def create_2D_dataset(dataset1D, window_lenght):
     """ 
@@ -95,3 +122,31 @@ def summarize_macd_intervals(df):
     df_grouped['duration_cal_days'] = (df_grouped['date_last'] - df_grouped['date_first']).dt.days.astype('int16') + 1
 
     return df_grouped.iloc[4:-1,:]  # removing the 4 first and last as the second order derivative is not valid for the two first samples
+
+
+def calculate_macd(df):
+    """returns a pandas series vector with the MACD diff (histogram) values
+    the input can be:
+    a pandas dataframe with column name 'Close' containing the closing prices
+    a pandas series vector, assumed to be the closing prices
+    a numpy array assumed to be the closing prices
+    """
+    
+    if isinstance(df, pd.DataFrame):
+        Close = df.loc[:,'Close']
+    elif isinstance(df, pd.Series):
+        Close = df
+    elif isinstance(df, np.array):
+        Close = pd.Series(df)
+    # Get the 12-day EMA of the closing price
+    k = Close.ewm(span=12, adjust=False, min_periods=12).mean()
+    # Get the 26-day EMA of the closing price
+    d = Close.ewm(span=26, adjust=False, min_periods=26).mean()
+    # Subtract the 26-day EMA from the 12-Day EMA to get the MACD
+    macd = k - d 
+    # Get the 9-Day EMA of the MACD for the Trigger line
+    signal = macd.ewm(span=9, adjust=False, min_periods=9).mean()
+    # Calculate the difference between the MACD - Trigger for the Convergence/Divergence value
+    macd_diff = macd - signal
+
+    return macd_diff
