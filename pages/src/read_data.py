@@ -1,11 +1,11 @@
-import streamlit as st
+# import streamlit as st
 import pandas as pd
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 import io
 import yfinance as yf
 import time
-import gc # garbage collection
+# import gc # garbage collection
 
 # Setup connection (Use environment variables for production!)
 account_url = "https://genaitraining68696287510.blob.core.windows.net"
@@ -13,7 +13,7 @@ container_name = "stock-data"
 blob_name = "Etoro_2000_14mar2025_2025-03-18_to_2026-03-11.parquet"
 # blob_name = "Etoro_2000_14mar2025.parquet" # Or prices.csv
 
-@st.cache_data
+# @st.cache_data
 def load_stock_data():
     try:
         # Authenticate using Managed Identity (if deployed) or Azure CLI (locally)
@@ -29,7 +29,8 @@ def load_stock_data():
         df = pd.read_parquet(io.BytesIO(data))
         return df
     except Exception as e:
-        st.error(f"Error loading data: {e}")
+        #st.error(f"Error loading data: {e}")
+        print(f"Error loading data: {e}")
         return pd.DataFrame()
 
 # Key Takeaways for your Job Prep:
@@ -45,7 +46,7 @@ def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, 
     source_blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
 
     # --- PHASE 1: Metadata Extraction ---
-    st.info("Extracting metadata from source...")
+    #st.info("Extracting metadata from source...")
     download_stream = source_blob_client.download_blob()
     
     # Read the file
@@ -58,19 +59,21 @@ def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, 
     end_date = pd.Timestamp.today()
     
     # Drop the big dataframe immediately
-    del df_temp
-    gc.collect() # Force memory release
-    st.success("Source file cleared from memory. Starting download...")
+    #del df_temp
+    # gc.collect() # Force memory release
+    # st.success("Source file cleared from memory. Starting download...")
 
     if start_date >= end_date:
-        st.warning("Data is already up to date.")
+        #st.warning("Data is already up to date.")
+        print("Data is already up to date.")
         return None
 
     # --- PHASE 2: Batch Download ---
     new_data_chunks = []
     for i in range(0, len(all_tickers), batch_size):
         batch = all_tickers[i:i + batch_size]
-        st.write(f"Fetching batch {i//batch_size + 1}...")
+        # st.write(f"Fetching batch {i//batch_size + 1}...")
+        print(f"Fetching batch {i//batch_size + 1}...")
         
         try:
             batch_df = yf.download(batch, start=start_date, end=end_date, group_by='ticker')
@@ -78,17 +81,20 @@ def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, 
                 new_data_chunks.append(batch_df)
             time.sleep(pause_seconds)
         except Exception as e:
-            st.error(f"Error fetching batch: {e}")
+            #st.error(f"Error fetching batch: {e}")
+
 
     if not new_data_chunks:
-        st.error("No new data was downloaded.")
+        # st.error("No new data was downloaded.")
+        print("No new data was downloaded.")
         return None
 
     # --- PHASE 3: Re-read & Merge ---
     # We re-read the original file ONLY when we are ready to merge and write.
     # This ensures we don't hold the original file in RAM while yfinance is running.
     
-    st.info("Re-loading original for final merge...")
+    # st.info("Re-loading original for final merge...")
+    print("Re-loading original for final merge...")
     download_stream = source_blob_client.download_blob()
     df_original = pd.read_parquet(io.BytesIO(download_stream.readall()))
     
@@ -103,7 +109,7 @@ def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, 
     del df_original
     del df_new
     del new_data_chunks
-    gc.collect()
+    #gc.collect()
 
     # --- PHASE 4: Filename Generation & Upload ---
     clean_name = blob_name.replace(".parquet", "")
@@ -118,9 +124,11 @@ def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, 
     
     try:
         new_blob_client.upload_blob(parquet_buffer, overwrite=True)
-        st.success(f"Saved to {new_blob_name}")
+        #st.success(f"Saved to {new_blob_name}")
+        print(f"Saved to {new_blob_name}")
         return df_combined
     except Exception as e:
-        st.error(f"Upload failed: {e}")
+        # st.error(f"Upload failed: {e}")
+        print(f"Upload failed: {e}")
         return None
 
