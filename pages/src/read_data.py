@@ -82,7 +82,7 @@ def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, 
             time.sleep(pause_seconds)
         except Exception as e:
             #st.error(f"Error fetching batch: {e}")
-
+            print(f"Error fetching batch: {e}")
 
     if not new_data_chunks:
         # st.error("No new data was downloaded.")
