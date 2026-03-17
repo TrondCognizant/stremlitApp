@@ -131,4 +131,3 @@ def update_and_save_to_azure(batch_size=30, pause_seconds=2): # container_name, 
         # st.error(f"Upload failed: {e}")
         print(f"Upload failed: {e}")
         return None
-

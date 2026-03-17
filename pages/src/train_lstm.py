@@ -28,6 +28,7 @@ except ImportError:
 # Now your code will recognize 'azureml'
 #mlflow.keras.autolog()
 
+
 def train_model(args):
     # 1. Start MLflow Autologging
     # This automatically captures model architecture, optimizer, epochs, and loss metrics
@@ -56,7 +57,7 @@ def train_model(args):
     scaler_path = "outputs/scaler.pkl"
     with open(scaler_path, "wb") as f:
         pickle.dump(series_scaling_vector_bull, f)
-    mlflow.log_artifact(scaler_path)
+    #mlflow.log_artifact(scaler_path)
 
     # 3. Dataset Creation
     X, Y = create_3D_dataset(
@@ -89,8 +90,8 @@ def train_model(args):
     )
 
     # 6. Save the final model to outputs
-    # model.save('outputs/lstm_model.h5') Obsolete format
-    model.save(f"outputs/lstm_model{args}.keras")
+    # model.save('outputs/lstm_model.h5')
+    model.save('outputs/lstm_model.keras') #` or `keras.saving.save_model(model, 'my_model.keras')`
 
 if __name__ == "__main__":
     # Define Argument Parser for Azure ML Command Line
