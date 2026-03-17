@@ -3,8 +3,9 @@ import os
 import time
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
+# Safely handle the import
 try:
-    from azure.ai.ml.exceptions import AssetException, MLClientRootException
+    from azure.ai.ml.exceptions import AssetException
 except ImportError:
     AssetException = Exception
 
@@ -50,7 +51,23 @@ if st.button("Start Training Job"):
         environment="AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
         compute=compute
     )
-    
+    try:
+        st.info(f"Submitting job from: {script_folder}")
+        returned_job = ml_client.jobs.create_or_update(job)
+        st.success(f"Job created! ID: {returned_job.name}")
+
+    except AzureError as e:
+        st.error("### Azure Service Error")
+        # str(e) is the reliable way to get the message in Python 3.12
+        st.code(str(e))
+        
+        if "Authorization" in str(e) or "403" in str(e):
+            st.warning("🔑 **Permission Issue:** Your Web App's Identity likely needs 'Storage Blob Data Contributor' on the workspace storage.")
+
+    except Exception as e:
+        st.error(f"### System Error: {type(e).__name__}")
+        st.code(str(e))
+    """
     try:
         st.info(f"Attempting to submit job with code from: {script_folder}")
         
@@ -80,6 +97,6 @@ if st.button("Start Training Job"):
 
     except Exception as e:
         st.error(f"### Unexpected Error: {type(e).__name__}")
-        st.exception(e)
+        st.exception(e) """
 
 
