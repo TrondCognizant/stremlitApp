@@ -3,7 +3,7 @@ import pandas as pd
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 import io
-import yfinance as yf
+# import yfinance as yf
 import time
 # import gc # garbage collection
 
