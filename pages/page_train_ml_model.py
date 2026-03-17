@@ -1,5 +1,6 @@
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
+from azure.ai.ml.exceptions import AssetException, MLClientRootException
 import streamlit as st
 import os
 import time
@@ -34,7 +35,7 @@ if not os.path.exists(code_dir):
     code_dir = os.path.abspath("./src")
 
 st.write(f"Uploading code from: {code_dir}")
-# st.write(f"Code_dir content: {os.listdir(code_dir)}")
+st.write(f"Code_dir content: {os.listdir(code_dir)}")
 if st.button("Start Training Job"):
     # 2. Define the training task
     job = command(
@@ -46,9 +47,35 @@ if st.button("Start Training Job"):
         compute=compute
     )
     
-    # 3. Submit the job
-    returned_job = ml_client.jobs.create_or_update(job)
-    st.info(f"Job started! View here: {returned_job.services['Studio'].endpoint}")
+    try:
+        st.info(f"Attempting to submit job with code from: {script_folder}")
+        
+        # Check if the directory even exists to avoid basic path errors
+        if not os.path.exists(code_dir):
+            st.error(f"Directory not found: {code_dir}")
+        else:
+            st.write("Files found:", os.listdir(code_dir))
+    
+        # 3. Submit the job
+        returned_job = ml_client.jobs.create_or_update(job)
+        st.info(f"Job started! View here: {returned_job.services['Studio'].endpoint}")
 
+    except AssetException as ae:
+        st.error("### Asset Upload Error")
+        st.warning("The SDK could not bundle or upload your code folder.")
+        st.code(ae.message)
+        
+        # Check for common Streamlit Cloud/App Service issues
+        if "Permission denied" in str(ae):
+            st.info("💡 **Tip:** The web app doesn't have write access to its own temp folder. "
+                    "Try setting the `code` parameter to a specific folder containing only the script.")
+
+    except MLClientRootException as re:
+        st.error("### Azure ML Client Error")
+        st.code(re.message)
+
+    except Exception as e:
+        st.error(f"### Unexpected Error: {type(e).__name__}")
+        st.exception(e)
 
 
