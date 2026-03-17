@@ -10,11 +10,28 @@ from keras.layers import Dense, LSTM
 from helper_functions import create_3D_dataset, summarize_macd_intervals
 from read_data import load_stock_data
 
+# 1. Silence the TensorFlow CPU warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+# 2. Force the registration of the azureml scheme
+try:
+    import azureml.mlflow
+    from azureml.core import Workspace
+    
+    # If running inside an Azure ML Job, this is usually automatic. 
+    # If running on a Compute Instance manually, you need this:
+    ws = Workspace.from_config()
+    #mlflow.set_tracking_uri(ws.get_mlflow_tracking_uri())
+except ImportError:
+    print("Warning: azureml-mlflow not found. Local logging only.")
+
+# Now your code will recognize 'azureml'
+#mlflow.keras.autolog()
 
 def train_model(args):
     # 1. Start MLflow Autologging
     # This automatically captures model architecture, optimizer, epochs, and loss metrics
-    mlflow.keras.autolog()
+    # mlflow.keras.autolog()
 
     # Create outputs directory if it doesn't exist
     os.makedirs('outputs', exist_ok=True)
