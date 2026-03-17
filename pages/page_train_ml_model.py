@@ -53,6 +53,9 @@ if st.button("Start Training Job"):
     )
     try:
         st.info(f"Submitting job from: {code_dir}")
+        st.write("Checking job attributes before submission...")
+        # This line will tell us if any attribute is missing before we even send it
+        st.json(job._to_dict())
         returned_job = ml_client.jobs.create_or_update(job)
         st.success(f"Job created! ID: {returned_job.name}")
 
