@@ -68,36 +68,6 @@ if st.button("Start Training Job"):
             st.warning("⚠️ **Diagnosis:** The SDK is failing to zip or upload the 'src' folder.")
             st.info("This usually happens because the Web App identity lacks 'Storage Blob Data Contributor' "
                     "permissions on the workspace storage account.")
-        """
-    try:
-        st.info(f"Attempting to submit job with code from: {script_folder}")
-        
-        # Check if the directory even exists to avoid basic path errors
-        if not os.path.exists(code_dir):
-            st.error(f"Directory not found: {code_dir}")
-        else:
-            st.write("Files found:", os.listdir(code_dir))
-    
-        # 3. Submit the job
-        returned_job = ml_client.jobs.create_or_update(job)
-        st.info(f"Job started! View here: {returned_job.services['Studio'].endpoint}")
-
-    except AssetException as ae:
-        st.error("### Asset Upload Error")
-        st.warning("The SDK could not bundle or upload your code folder.")
-        st.code(ae.message)
-        
-        # Check for common Streamlit Cloud/App Service issues
-        if "Permission denied" in str(ae):
-            st.info("💡 **Tip:** The web app doesn't have write access to its own temp folder. "
-                    "Try setting the `code` parameter to a specific folder containing only the script.")
-
-    except MLClientRootException as re:
-        st.error("### Azure ML Client Error")
-        st.code(re.message)
-
-    except Exception as e:
-        st.error(f"### Unexpected Error: {type(e).__name__}")
-        st.exception(e) """
+            
 
 
