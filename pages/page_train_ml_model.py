@@ -52,7 +52,7 @@ if st.button("Start Training Job"):
         compute=compute
     )
     try:
-        st.info(f"Submitting job from: {script_folder}")
+        st.info(f"Submitting job from: {code_dir}")
         returned_job = ml_client.jobs.create_or_update(job)
         st.success(f"Job created! ID: {returned_job.name}")
 
