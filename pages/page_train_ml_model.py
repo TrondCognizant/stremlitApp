@@ -1,7 +1,9 @@
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
-from azure.ai.ml.exceptions import AssetException, MLClientRootException
-import streamlit as st
+try:
+    from azure.ai.ml.exceptions import AssetException, MLClientRootException
+except ImportError:
+    AssetException = Exception
 import os
 import time
 
