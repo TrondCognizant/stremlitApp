@@ -5,9 +5,9 @@ from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
 # Safely handle the import
 try:
-    from azure.ai.ml.exceptions import AssetException
+    from azure.core.exceptions import AzureError
 except ImportError:
-    AssetException = Exception
+    AzureError = Exception
 
 
 
@@ -56,18 +56,19 @@ if st.button("Start Training Job"):
         returned_job = ml_client.jobs.create_or_update(job)
         st.success(f"Job created! ID: {returned_job.name}")
 
-    except AzureError as e:
-        st.error("### Azure Service Error")
-        # str(e) is the reliable way to get the message in Python 3.12
-        st.code(str(e))
-        
-        if "Authorization" in str(e) or "403" in str(e):
-            st.warning("🔑 **Permission Issue:** Your Web App's Identity likely needs 'Storage Blob Data Contributor' on the workspace storage.")
-
     except Exception as e:
-        st.error(f"### System Error: {type(e).__name__}")
-        st.code(str(e))
-    """
+        st.error(f"### Job Submission Failed")
+        
+        # This is the most reliable way to show the error message in Python 3.12
+        error_msg = str(e)
+        st.code(error_msg)
+        
+        # Logical check for common issues
+        if "AssetException" in error_msg or "upload" in error_msg.lower():
+            st.warning("⚠️ **Diagnosis:** The SDK is failing to zip or upload the 'src' folder.")
+            st.info("This usually happens because the Web App identity lacks 'Storage Blob Data Contributor' "
+                    "permissions on the workspace storage account.")
+        """
     try:
         st.info(f"Attempting to submit job with code from: {script_folder}")
         
