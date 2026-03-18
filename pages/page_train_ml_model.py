@@ -3,6 +3,7 @@ import os
 import time
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
+from azure.ai.ml.entities import Environment
 # Safely handle the import
 try:
     from azure.core.exceptions import AzureError
@@ -30,6 +31,9 @@ hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
 # In Azure Web Apps, this is usually /home/site/wwwroot
 base_dir = os.path.abspath(os.path.dirname(__file__))
 code_dir = os.path.join(base_dir, "src")
+# 1. Point to your local env.yml (the one we rewrote for Python 3.8/TF 2.13)
+# Assuming it's in your /src folder
+conda_file_path = code_dir + "/environment.yml"
 
 # Use the environment variable Azure sets for the root of the site DID NOT WORK
 #site_root = os.environ.get("HOME", "/home") + "/site/wwwroot"
@@ -42,13 +46,21 @@ if not os.path.exists(code_dir):
 st.write(f"Uploading code from: {code_dir}")
 st.write(f"Code_dir content: {os.listdir(code_dir)}")
 if st.button("Start Training Job"):
-    # 2. Define the training task
+ 
+     # 2. Define the Environment object
+    custom_env = Environment(
+        name="lstm_training_env",
+        description="Custom environment for LSTM training",
+        # Use a reliable base image that always exists
+        image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest",
+        conda_file=conda_file_path,
+    )
     job = command(
         name=f"lstm-train-{int(time.time())}", # Add a unique name
         code=code_dir, 
         inputs={"hidden_nodes": hidden_nodes},
         command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
-        environment="AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
+        environment=custom_env, # "AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
         compute=compute
     )
     try:
