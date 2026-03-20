@@ -60,7 +60,7 @@ if st.button("Start Training Job"):
         name=f"lstm-train-{int(time.time())}", # Add a unique name
         code=code_dir, 
         inputs={"hidden_nodes": hidden_nodes},
-        command="python3 train_lstm.py --hidden_nodes 5" # ${{inputs.hidden_nodes}}",
+        command="python3 train_lstm.py --hidden_nodes 5", # ${{inputs.hidden_nodes}}",
         environment=custom_env, # "AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
         compute=compute
     )
