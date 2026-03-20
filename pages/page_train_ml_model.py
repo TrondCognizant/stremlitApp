@@ -12,10 +12,10 @@ except ImportError:
 
 
 
-subscription_id= "d2bda5a8-0cf7-480c-bf1f-6d7ec7b665ba" # os.getenv("AZURE_SUBSCRIPTION_ID")
-resource_group = "perceptbootcamp-aia-norway" # "PerceptBootcamp-aia-Norway"
+subscription_id = "d2bda5a8-0cf7-480c-bf1f-6d7ec7b665ba" # os.getenv("AZURE_SUBSCRIPTION_ID")
+resource_group = "perceptbootcamp-aia-norway" 
 workspace_name = "percept-workspace"
-compute="Standard-D4s-v3-cluster-694450" #"Standard-DS3-v2-cluster-694450"  # D4s-v3-cpu694450 cpu not possible to use with command jobs, only clusters
+compute = "Standard-D4s-v3-cluster-694450" #"Standard-DS3-v2-cluster-694450"  # D4s-v3-cpu694450 cpu not possible to use with command jobs, only clusters
 
 # 1. Connect to Azure ML Workspace
 ml_client = MLClient(DefaultAzureCredential(), 
@@ -33,7 +33,7 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 code_dir = os.path.join(base_dir, "src")
 # 1. Point to your local env.yml (the one we rewrote for Python 3.8/TF 2.13)
 # Assuming it's in your /src folder
-conda_file_path = code_dir + "/environment.yml"
+conda_file_path = os.path.join(code_dir, "environment.yml")
 
 # Use the environment variable Azure sets for the root of the site DID NOT WORK
 #site_root = os.environ.get("HOME", "/home") + "/site/wwwroot"
@@ -48,6 +48,7 @@ st.write(f"Code_dir content: {os.listdir(code_dir)}")
 if st.button("Start Training Job"):
  
      # 2. Define the Environment object
+    st.write(f"Creating environment using: {conda_file_path}")
     custom_env = Environment(
         name="lstm_training_env",
         description="Custom environment for LSTM training",
@@ -59,7 +60,7 @@ if st.button("Start Training Job"):
         name=f"lstm-train-{int(time.time())}", # Add a unique name
         code=code_dir, 
         inputs={"hidden_nodes": hidden_nodes},
-        command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
+        command="python3 train_lstm.py --hidden_nodes 5" # ${{inputs.hidden_nodes}}",
         environment=custom_env, # "AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
         compute=compute
     )
