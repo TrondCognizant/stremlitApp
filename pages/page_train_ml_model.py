@@ -4,6 +4,7 @@ import time
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml.entities import Environment, AmlCompute
+from azure.core.exceptions import HttpResponseError
 
 # Safely handle the import
 try:
@@ -67,13 +68,25 @@ if st.button("Start Training Job"):
         compute=compute_name
     )
     ##### TEMPORARY code
-    st.write("### 🔍 Searching for Compute Clusters...")
     try:
-        available_computes = ml_client.compute.list()
-        st.write(f"Available computes iterator: {available_computes}")
-        st.write(f"Available computes list: {list(available_computes)}")
+        st.write("Checking connection to Workspace...")
+        # Attempting to fetch the first item in the list
+        all_computes = ml_client.compute.list()
+        first_compute = next(iter(all_computes), None)
+        
+        if first_compute:
+            st.success(f"Successfully connected! Found: {first_compute.name}")
+        else:
+            st.warning("Connected, but the compute list is empty.")
+
+    except HttpResponseError as e:
+        st.error("### 🛑 Azure Permission Error")
+        st.code(f"Status Code: {e.status_code}\nMessage: {e.message}")
+        if e.status_code == 403:
+            st.info("Tip: Your Web App's Managed Identity doesn't have permission to 'read' computes. "
+                    "Add the 'Reader' or 'AzureML Data Scientist' role in IAM.")
     except Exception as e:
-        st.error(f"Error occurred while fetching available computes: {str(e)}")
+        st.error(f"General Error: {type(e).__name__} - {str(e)}")
     ##### END TEMPORARY CODE
     
     try:
