@@ -68,8 +68,12 @@ if st.button("Start Training Job"):
     )
     ##### TEMPORARY code
     st.write("### 🔍 Searching for Compute Clusters...")
-    available_computes = list(ml_client.compute.list())
-    st.write(f"Available computes: {available_computes}")
+    try:
+        available_computes = ml_client.compute.list()
+        st.write(f"Available computes iterator: {available_computes}")
+        st.write(f"Available computes list: {list(available_computes)}")
+    except Exception as e:
+        st.error(f"Error occurred while fetching available computes: {str(e)}")
     ##### END TEMPORARY CODE
     
     try:
