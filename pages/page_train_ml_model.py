@@ -73,20 +73,21 @@ if st.button("Start Training Job"):
         st.success(f"✅ Found compute cluster: {found_compute.name} (Status: {found_compute.provisioning_state})")
         
         # 3. Build the job using the validated name
-        job = command(
-            code="/tmp/8de84fcf8927f7a/pages/src",
-            command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
-            inputs={"hidden_nodes": 1},
-            environment=custom_env,
-            compute=compute_name, # Use the string name we just verified
-            experiment_name="lstm-training-webapp"
-        )
+        #job = command(
+        #    code="/tmp/8de84fcf8927f7a/pages/src",
+        #    command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
+        #    inputs={"hidden_nodes": 1},
+        #    environment=custom_env,
+        #    compute=compute_name, # Use the string name we just verified
+        #    experiment_name="lstm-training-webapp"
+        #)
 
-        returned_job = ml_client.jobs.create_or_update(job)
-        st.success(f"🚀 Job submitted! Name: {returned_job.name}")
+        #returned_job = ml_client.jobs.create_or_update(job)
+        #st.success(f"🚀 Job submitted! Name: {returned_job.name}")
 
     except Exception as e:
         st.error(f"Error: {str(e)}")
+        st.error(f"Failed to find {compute_name}")
         if "not found" in str(e).lower():
             st.warning("The SDK still can't find the cluster. Double-check that your Resource Group name in the code matches the 'perceptbootcamp...' spelling exactly.")
     ##### END TEMPORARY CODE
