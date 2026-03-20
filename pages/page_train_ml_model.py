@@ -68,7 +68,7 @@ if st.button("Start Training Job"):
     )
     ##### TEMPORARY code
     st.write("### 🔍 Searching for Compute Clusters...")
-    available_computes = ml_client.compute.list()
+    available_computes = list(ml_client.compute.list())
     st.write(f"Available computes: {available_computes}")
     ##### END TEMPORARY CODE
     
