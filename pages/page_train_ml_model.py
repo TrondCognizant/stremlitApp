@@ -3,7 +3,8 @@ import os
 import time
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
-from azure.ai.ml.entities import Environment
+from azure.ai.ml.entities import Environment, AmlCompute
+
 # Safely handle the import
 try:
     from azure.core.exceptions import AzureError
@@ -15,7 +16,7 @@ except ImportError:
 subscription_id = "d2bda5a8-0cf7-480c-bf1f-6d7ec7b665ba" # os.getenv("AZURE_SUBSCRIPTION_ID")
 resource_group = "perceptbootcamp-aia-norway" 
 workspace_name = "percept-workspace"
-compute = "Standard-D4s-v3-cluster-694450" #"Standard-DS3-v2-cluster-694450"  # D4s-v3-cpu694450 cpu not possible to use with command jobs, only clusters
+compute_name = "Standard-D4s-v3-cluster-694450" #"Standard-DS3-v2-cluster-694450"  # D4s-v3-cpu694450 cpu not possible to use with command jobs, only clusters
 
 # 1. Connect to Azure ML Workspace
 ml_client = MLClient(DefaultAzureCredential(), 
@@ -38,6 +39,7 @@ conda_file_path = os.path.join(code_dir, "environment.yml")
 # Use the environment variable Azure sets for the root of the site DID NOT WORK
 #site_root = os.environ.get("HOME", "/home") + "/site/wwwroot"
 #code_dir = os.path.join(site_root, "src")
+
 
 if not os.path.exists(code_dir):
     # Fallback for local testing
@@ -62,8 +64,33 @@ if st.button("Start Training Job"):
         inputs={"hidden_nodes": hidden_nodes},
         command="python3 train_lstm.py --hidden_nodes 5", # ${{inputs.hidden_nodes}}",
         environment=custom_env, # "AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
-        compute=compute
+        compute=compute_name
     )
+    ##### TEMPORARY code
+    try:
+        # Diagnostic: Let's see if the client can even "see" the compute
+        found_compute = ml_client.compute.get(compute_name)
+        st.success(f"✅ Found compute cluster: {found_compute.name} (Status: {found_compute.provisioning_state})")
+        
+        # 3. Build the job using the validated name
+        job = command(
+            code="/tmp/8de84fcf8927f7a/pages/src",
+            command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
+            inputs={"hidden_nodes": 1},
+            environment=custom_env,
+            compute=compute_name, # Use the string name we just verified
+            experiment_name="lstm-training-webapp"
+        )
+
+        returned_job = ml_client.jobs.create_or_update(job)
+        st.success(f"🚀 Job submitted! Name: {returned_job.name}")
+
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+        if "not found" in str(e).lower():
+            st.warning("The SDK still can't find the cluster. Double-check that your Resource Group name in the code matches the 'perceptbootcamp...' spelling exactly.")
+    ##### END TEMPORARY CODE
+    
     try:
         st.info(f"Submitting job from: {code_dir}")
         st.write("Checking job attributes before submission...")
