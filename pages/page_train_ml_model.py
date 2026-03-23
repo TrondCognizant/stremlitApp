@@ -12,10 +12,8 @@ try:
 except ImportError:
     AzureError = Exception
 
-
-
-subscription_id = "d2bda5a8-0cf7-480c-bf1f-6d7ec7b665ba" # os.getenv("AZURE_SUBSCRIPTION_ID")
-resource_group = "PerceptBootcamp-aia-Norway" 
+subscription_id = "d2bda5a8-0cf7-480c-bf1f-6d7ec7b665ba" 
+resource_group = "perceptbootcamp-aia-norway". # "PerceptBootcamp-aia-Norway" 
 workspace_name = "percept-workspace"
 compute_name = "Standard-D4s-v3-cluster-694450" #"Standard-DS3-v2-cluster-694450"  # D4s-v3-cpu694450 cpu not possible to use with command jobs, only clusters
 
