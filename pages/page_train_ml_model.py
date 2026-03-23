@@ -68,25 +68,34 @@ if st.button("Start Training Job"):
         compute=compute_name
     )
     ##### TEMPORARY code
-    try:
-        st.write("Checking connection to Workspace...")
-        # Attempting to fetch the first item in the list
-        all_computes = ml_client.compute.list()
-        first_compute = next(iter(all_computes), None)
-        
-        if first_compute:
-            st.success(f"Successfully connected! Found: {first_compute.name}")
-        else:
-            st.warning("Connected, but the compute list is empty.")
+    from azure.ai.ml.entities import Environment, BuildContext
 
-    except HttpResponseError as e:
-        st.error("### 🛑 Azure Permission Error")
-        st.code(f"Status Code: {e.status_code}\nMessage: {e.message}")
-        if e.status_code == 403:
-            st.info("Tip: Your Web App's Managed Identity doesn't have permission to 'read' computes. "
-                    "Add the 'Reader' or 'AzureML Data Scientist' role in IAM.")
-    except Exception as e:
-        st.error(f"General Error: {type(e).__name__} - {str(e)}")
+    # 1. Define Environment with an explicit name
+    env_name = "lstm_env_manual"
+    my_env = Environment(
+        name=env_name,
+        image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest",
+        conda_file="/tmp/8de84fcf8927f7a/pages/src/env.yml",
+    )
+
+    # 2. Register it FIRST
+    st.info("Registering environment...")
+    ml_client.environments.create_or_update(my_env)
+
+    # 3. Submit the job using the string name of the registered environment
+    job = command(
+        code="/tmp/8de84fcf8927f7a/pages/src",
+        command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
+        inputs={"hidden_nodes": 1},
+        environment=f"{env_name}:1", # Use the versioned string
+        compute="Standard-D4s-v3-cluster-694450",
+        experiment_name="lstm-training-webapp"
+    )
+
+    st.info("Submitting job...")
+    returned_job = ml_client.jobs.create_or_update(job)
+    st.success(f"Job submitted: {returned_job.name}")
+
     ##### END TEMPORARY CODE
     
     try:
