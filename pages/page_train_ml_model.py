@@ -3,7 +3,7 @@ import os
 import time
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
-from azure.ai.ml.entities import Environment, Code, AmlCompute
+from azure.ai.ml.entities import Environment
 from azure.core.exceptions import HttpResponseError
 
 # Safely handle the import
@@ -106,6 +106,7 @@ if st.button("Start Training Job"):
      # 2. Define the Environment object
     st.write(f"Creating environment using: {conda_file_path}")
     custom_env = Environment(
+        
         name="lstm_training_env",
         description="Custom environment for LSTM training",
         # Use a reliable base image that always exists
@@ -113,20 +114,14 @@ if st.button("Start Training Job"):
         conda_file=conda_file_path,
     )
     ################### update to fix relative path issues
-    # 1. Register the Code asset first
-    # This uploads your /src folder to Azure and gives us a clean reference
-    st.info("Uploading source code...")
-    code_asset = ml_client.code.create_or_update(
-        Code(base_path="/tmp/8de88c262d522ff/pages", path="src")
-    )
-
     # 2. Register the Environment (if not already done)
     st.info("Registering environment...")
     registered_env = ml_client.environments.create_or_update(custom_env)
     
     job = command(
-        # Use the ID of the uploaded code asset
-        code=code_asset.id, 
+
+        # Use a plain string for the path, ensuring no 'azureml:' prefix is added manually
+        code="./src",
         command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
         inputs={"hidden_nodes": hidden_nodes},
         # Use the ID of the registered environment
