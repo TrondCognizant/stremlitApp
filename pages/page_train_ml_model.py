@@ -13,7 +13,7 @@ except ImportError:
     AzureError = Exception
 
 subscription_id = "d2bda5a8-0cf7-480c-bf1f-6d7ec7b665ba" 
-resource_group = "perceptbootcamp-aia-norway" # "PerceptBootcamp-aia-Norway" 
+resource_group = "PerceptBootcamp-aia-Norway" 
 workspace_name = "percept-workspace"
 compute_name = "Standard-D4s-v3-cluster-694450" #"Standard-DS3-v2-cluster-694450"  # D4s-v3-cpu694450 cpu not possible to use with command jobs, only clusters
 
@@ -23,6 +23,13 @@ ml_client = MLClient(DefaultAzureCredential(),
                      rg=resource_group, 
                      workspace=workspace_name
                      )
+
+# 3. Test the connection BEFORE trying to create the environment
+try:
+    ws = ml_client.workspaces.get(workspace_name)
+    st.success(f"✅ Connection Verified! Found Workspace: {ws.name}")
+except Exception as e:
+    st.error(f"❌ Connection Failed: {str(e)}")
 
 st.title("ML Control Center")
 hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
