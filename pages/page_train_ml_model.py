@@ -3,7 +3,7 @@ import os
 import time
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
-from azure.ai.ml.entities import Environment, AmlCompute
+from azure.ai.ml.entities import Environment, Code, AmlCompute
 from azure.core.exceptions import HttpResponseError
 
 # Safely handle the import
@@ -112,6 +112,31 @@ if st.button("Start Training Job"):
         image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest",
         conda_file=conda_file_path,
     )
+    ################### update to fix relative path issues
+    # 1. Register the Code asset first
+    # This uploads your /src folder to Azure and gives us a clean reference
+    st.info("Uploading source code...")
+    code_asset = ml_client.code.create_or_update(
+        Code(base_path="/tmp/8de88c262d522ff/pages", path="src")
+    )
+
+    # 2. Register the Environment (if not already done)
+    st.info("Registering environment...")
+    registered_env = ml_client.environments.create_or_update(custom_env)
+    
+    job = command(
+        # Use the ID of the uploaded code asset
+        code=code_asset.id, 
+        command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
+        inputs={"hidden_nodes": hidden_nodes},
+        # Use the ID of the registered environment
+        environment=registered_env.id, 
+        compute=compute_name,
+        experiment_name="lstm-training-webapp",
+        display_name="LSTM_Final_Run"
+    )
+    ####################
+    """ 
     job = command(
         name=f"lstm-train-{int(time.time())}", # Add a unique name
         code=code_dir, 
@@ -119,7 +144,7 @@ if st.button("Start Training Job"):
         command="python3 train_lstm.py --hidden_nodes 5", # ${{inputs.hidden_nodes}}",
         environment=custom_env, # "AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
         compute=compute_name
-    )
+    )"""
     ##### TEMPORARY code
     from azure.ai.ml.entities import Environment, BuildContext
 
