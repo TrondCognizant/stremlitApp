@@ -71,12 +71,6 @@ if st.button("Start Training Job"):
     from azure.ai.ml.entities import Environment, BuildContext
 
     # 1. Define Environment with an explicit name
-    env_name = "lstm_env_manual"
-    my_env = Environment(
-        name=env_name,
-        image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest",
-        conda_file="/tmp/8de84fcf8927f7a/pages/src/env.yml",
-    )
 
     # 2. Register it FIRST
     st.info("Registering environment...")
@@ -87,8 +81,8 @@ if st.button("Start Training Job"):
         code="/tmp/8de84fcf8927f7a/pages/src",
         command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
         inputs={"hidden_nodes": 1},
-        environment=f"{env_name}:1", # Use the versioned string
-        compute="Standard-D4s-v3-cluster-694450",
+        environment=f"{custom_env}:1", # Use the versioned string
+        compute=compute_name, #"Standard-D4s-v3-cluster-694450",
         experiment_name="lstm-training-webapp"
     )
 
