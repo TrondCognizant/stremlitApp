@@ -24,12 +24,60 @@ ml_client = MLClient(DefaultAzureCredential(),
                      workspace=workspace_name
                      )
 
-# 3. Test the connection BEFORE trying to create the environment
+#  Test the connection BEFORE trying to create the environment
+
+# --- STEP 1: Variable Integrity Check ---
+st.subheader("1. Environment Variable Check")
+creds = {
+    "SUB_ID": "d2bda5a8-0cf7-480c-bf1f-6d7ec7b665ba",
+    "RG_NAME": "PerceptBootcamp-aia-Norway", # Ensure this is exactly what's in the Portal
+    "WS_NAME": "percept-workspace"
+}
+
+for key, value in creds.items():
+    if value is None or value == "None" or value == "":
+        st.error(f"❌ {key} is missing or literal 'None'!")
+    else:
+        st.write(f"✅ {key} is set to: `{value}`")
+
+# --- STEP 2: Client Hydration Check ---
+st.subheader("2. SDK Client Validation")
 try:
-    ws = ml_client.workspaces.get(workspace_name)
-    st.success(f"✅ Connection Verified! Found Workspace: {ws.name}")
+    ml_client = MLClient(
+        credential=DefaultAzureCredential(),
+        subscription_id=creds["SUB_ID"],
+        resource_group_name=creds["RG_NAME"],
+        workspace_name=creds["WS_NAME"]
+    )
+    
+    # Force the SDK to reveal what it thinks the internal path is
+    st.write(f"SDK internal RG: `{ml_client.resource_group_name}`")
+    
+    if ml_client.resource_group_name is None:
+        st.error("🚨 CRITICAL: MLClient failed to ingest the Resource Group name!")
 except Exception as e:
-    st.error(f"❌ Connection Failed: {str(e)}")
+    st.error(f"Client Init Failed: {e}")
+
+# --- STEP 3: The "Handshake" Test ---
+st.subheader("3. Workspace & Identity Handshake")
+try:
+    # This triggers the actual API call to Azure
+    ws_details = ml_client.workspaces.get(creds["WS_NAME"])
+    st.success(f"🎉 Success! Connected to Workspace ID: `{ws_details.id}`")
+    
+except HttpResponseError as e:
+    st.error("### 🛑 Authorization / Scope Failure")
+    st.code(f"Error Code: {e.error.code if e.error else 'Unknown'}")
+    st.code(f"Message: {e.message}")
+    
+    # Logic to decode the 'None' error
+    if "resourceGroups/None" in e.message:
+        st.warning("👉 **THE PROBLEM:** The SDK is sending 'None' as the Resource Group name. "
+                   "This usually means the variable passed to MLClient was null at initialization.")
+    elif "AuthorizationFailed" in e.message:
+        st.warning("👉 **THE PROBLEM:** The Managed Identity is recognized, but it doesn't have 'Reader' or 'Contributor' "
+                   "access to the Workspace. Go to IAM in Azure Portal to fix this.")
+    
 
 st.title("ML Control Center")
 hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
