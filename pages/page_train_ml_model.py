@@ -114,56 +114,65 @@ if st.button("Start Training Job"):
         conda_file=conda_file_path,
     )
     ################### update to fix relative path issues
-    # 2. Register the Environment (if not already done)
-    st.info("Registering environment...")
-    registered_env = ml_client.environments.create_or_update(custom_env)
+
+    # 1. Register the Environment separately
+    # This creates the versioned asset in Azure ML Studio
+    try:
+        st.info("Registering Environment asset...")
+        # This call converts your object into a real Azure resource
+        registered_env = ml_client.environments.create_or_update(custom_env)
+        # We only want the ID (the long string starting with /subscriptions/...)
+        env_id = registered_env.id 
+    except Exception as e:
+        st.error(f"Environment registration failed: {e}")
+        st.stop()
+
+    # 2. Register the Code separately
+    # This handles the upload of your /src folder
+    try:
+        st.info("Uploading Source Code...")
+        # Instead of 'Code' entity, we can use this trick to get a clean ID
+        # point 'path' to the folder containing your train_lstm.py
+        #from azure.ai.ml.entities import Model # Just a dummy to check imports if needed
+        
+        # We will let the command handle code but we must fix the path
+        # If your script is at /tmp/.../pages/src/train_lstm.py
+        # then 'code' should just be the folder path
+        local_code_path = "/tmp/8de88dedfddf46b/pages/src"
+    except Exception as e:
+        st.error(f"Code path setup failed: {e}")
+        st.stop()
     
+    # 3. Build the Job using STRINGS, not objects
     job = command(
-
-        # Use a plain string for the path, ensuring no 'azureml:' prefix is added manually
-        code="./src",
-        command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
-        inputs={"hidden_nodes": hidden_nodes},
-        # Use the ID of the registered environment
-        environment=registered_env.id, 
-        compute=compute_name,
-        experiment_name="lstm-training-webapp",
-        display_name="LSTM_Final_Run"
-    )
-    ####################
-    """ 
-    job = command(
-        name=f"lstm-train-{int(time.time())}", # Add a unique name
-        code=code_dir, 
-        inputs={"hidden_nodes": hidden_nodes},
-        command="python3 train_lstm.py --hidden_nodes 5", # ${{inputs.hidden_nodes}}",
-        environment=custom_env, # "AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
-        compute=compute_name
-    )"""
-    ##### TEMPORARY code
-    from azure.ai.ml.entities import Environment, BuildContext
-
-    # 1. Define Environment with an explicit name
-
-    # 2. Register it FIRST
-    st.info("Registering environment...")
-    ml_client.environments.create_or_update(custom_env)
-
-    # 3. Submit the job using the string name of the registered environment
-    job = command(
-        code="/tmp/8de84fcf8927f7a/pages/src",
-        command="python3 train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
+        code=local_code_path, # Pure string path
+        command="python train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
         inputs={"hidden_nodes": 1},
-        environment=f"{custom_env}:1", # Use the versioned string
-        compute=compute_name, #"Standard-D4s-v3-cluster-694450",
+        environment=env_id,   # Using the ID string from Step 1
+        compute="Standard-D4s-v3-cluster-694450",
         experiment_name="lstm-training-webapp"
     )
 
-    st.info("Submitting job...")
-    returned_job = ml_client.jobs.create_or_update(job)
-    st.success(f"Job submitted: {returned_job.name}")
-
-    ##### END TEMPORARY CODE
+    # 4. Final Submission
+    try:
+        st.info("Submitting Job...")
+        returned_job = ml_client.jobs.create_or_update(job)
+        st.success(f"🚀 Job submitted! Status: {returned_job.status}")
+        st.link_button("View in Azure Studio", returned_job.studio_url)
+    except Exception as e:
+        st.error("Submission failed. Check the error below:")
+        st.code(str(e))
+        ####################
+        """ 
+        job = command(
+            name=f"lstm-train-{int(time.time())}", # Add a unique name
+            code=code_dir, 
+            inputs={"hidden_nodes": hidden_nodes},
+            command="python3 train_lstm.py --hidden_nodes 5", # ${{inputs.hidden_nodes}}",
+            environment=custom_env, # "AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
+            compute=compute_name
+        )"""
+        
     
     try:
         st.info(f"Submitting job from: {code_dir}")
