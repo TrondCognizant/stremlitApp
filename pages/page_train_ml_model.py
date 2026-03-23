@@ -74,7 +74,7 @@ if st.button("Start Training Job"):
 
     # 2. Register it FIRST
     st.info("Registering environment...")
-    ml_client.environments.create_or_update(my_env)
+    ml_client.environments.create_or_update(custom_env)
 
     # 3. Submit the job using the string name of the registered environment
     job = command(
