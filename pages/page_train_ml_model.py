@@ -4,6 +4,7 @@ import time
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml.entities import Environment
+from azure.ai.ml import Code
 from azure.core.exceptions import HttpResponseError
 
 # Safely handle the import
@@ -127,31 +128,45 @@ if st.button("Start Training Job"):
         st.error(f"Environment registration failed: {e}")
         st.stop()
 
-    # 2. Register the Code separately
-    # This handles the upload of your /src folder
-    try:
-        st.info("Uploading Source Code...")
-        # Instead of 'Code' entity, we can use this trick to get a clean ID
-        # point 'path' to the folder containing your train_lstm.py
-        #from azure.ai.ml.entities import Model # Just a dummy to check imports if needed
-        
-        # We will let the command handle code but we must fix the path
-        # If your script is at /tmp/.../pages/src/train_lstm.py
-        # then 'code' should just be the folder path
-        local_code_path = "/tmp/8de88dedfddf46b/pages/src"
-    except Exception as e:
-        st.error(f"Code path setup failed: {e}")
+    # 2. Define the local path clearly
+    # Verify this path exists in your Streamlit environment
+    local_src_path = "/tmp/8de88dedfddf46b/pages/src"
+
+    if not os.path.exists(local_src_path):
+        st.error(f"🚨 Path does not exist: {local_src_path}")
         st.stop()
-    
-    # 3. Build the Job using STRINGS, not objects
+
+    # 3. Manually register the code asset
+    # This forces the SDK to upload the folder to Azure Storage immediately
+    try:
+        st.info("Uploading source code to Azure Storage...")
+        my_code = Code(path=local_src_path)
+        uploaded_code = ml_client.code.create_or_update(my_code)
+        
+        # We now have a clean Azure Resource ID (it starts with /subscriptions/...)
+        code_id = uploaded_code.id
+        st.success("✅ Code uploaded successfully.")
+    except Exception as e:
+        st.error(f"Failed to upload code: {e}")
+        st.stop()
+        # 3. Submit the Job using ONLY the ID strings
     job = command(
+        code=code_id,  # <--- Use the ID from the upload above
+        command="python train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
+        inputs={"hidden_nodes": 1},
+        environment=env_id, # Use the registered_env.id from our previous step
+        compute="Standard-D4s-v3-cluster-694450",
+        experiment_name="lstm-training-webapp"
+    )
+    # 3. Build the Job using STRINGS, not objects
+    """job = command(
         code=local_code_path, # Pure string path
         command="python train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
         inputs={"hidden_nodes": 1},
         environment=env_id,   # Using the ID string from Step 1
         compute="Standard-D4s-v3-cluster-694450",
         experiment_name="lstm-training-webapp"
-    )
+    )"""
 
     # 4. Final Submission
     try:
