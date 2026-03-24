@@ -3,8 +3,7 @@ import os
 import time
 from azure.ai.ml import MLClient, command
 from azure.identity import DefaultAzureCredential
-from azure.ai.ml.entities import Environment
-from azure.ai.ml import Code
+from azure.ai.ml.entities import Environment, CodeConfiguration
 from azure.core.exceptions import HttpResponseError
 
 # Safely handle the import
@@ -140,7 +139,7 @@ if st.button("Start Training Job"):
     # This forces the SDK to upload the folder to Azure Storage immediately
     try:
         st.info("Uploading source code to Azure Storage...")
-        my_code = Code(path=local_src_path)
+        my_code = CodeConfiguration(path=local_src_path)
         uploaded_code = ml_client.code.create_or_update(my_code)
         
         # We now have a clean Azure Resource ID (it starts with /subscriptions/...)

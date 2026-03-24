@@ -12,5 +12,5 @@ dependencies:
     - mlflow<=2.10.0      # Newer MLflow versions prefer Python 3.9+
     - mlflow-skinny
     - azureml-mlflow
-    - azure-ai-ml==1.22.4
+    - azure-ai-ml
     - azure-identity
