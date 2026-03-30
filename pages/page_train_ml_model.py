@@ -84,15 +84,37 @@ hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
 
 # 1. Get the absolute path of the directory where your Web App code lives
 # In Azure Web Apps, this is usually /home/site/wwwroot
-base_dir = os.path.abspath(os.path.dirname(__file__))
-code_dir = os.path.join(base_dir, "src")
+#base_dir = os.path.abspath(os.path.dirname(__file__))
+#code_dir = os.path.join(base_dir, "src")
 # 1. Point to your local env.yml (the one we rewrote for Python 3.8/TF 2.13)
 # Assuming it's in your /src folder
-conda_file_path = os.path.join(code_dir, "environment.yml")
+#conda_file_path = os.path.join(code_dir, "environment.yml")
+# 1. Get the directory where THIS script is currently sitting
+# This will automatically handle the '8de89b...' vs '8de88d...' change
+current_page_dir = os.path.dirname(os.path.abspath(__file__))
+local_src_path = os.path.join(current_page_dir, "src")
 
-# Use the environment variable Azure sets for the root of the site DID NOT WORK
-#site_root = os.environ.get("HOME", "/home") + "/site/wwwroot"
-#code_dir = os.path.join(site_root, "src")
+st.write(f"📂 Current Session Directory: `{current_page_dir}`")
+
+# 2. Safety Check
+if not os.path.exists(local_src_path):
+    st.error(f"🚨 Still can't find 'src' at {local_src_path}")
+    st.info(f"Existing items in this folder: {os.listdir(current_page_dir)}")
+    st.stop()
+
+# 3. Register the Code Asset using the dynamic path
+try:
+    st.info("Uploading source code from current session...")
+    my_code = Code(path=local_src_path)
+    uploaded_code = ml_client.code.create_or_update(my_code)
+    code_id = uploaded_code.id
+    st.success("✅ Code uploaded successfully!")
+except Exception as e:
+    st.error(f"Upload failed: {e}")
+    st.stop()
+    
+# Instead of hardcoding /tmp/...
+env_path = os.path.join(current_page_dir, "src", "environment.yml")
 
 
 if not os.path.exists(code_dir):
@@ -104,14 +126,14 @@ st.write(f"Code_dir content: {os.listdir(code_dir)}")
 if st.button("Start Training Job"):
  
      # 2. Define the Environment object
-    st.write(f"Creating environment using: {conda_file_path}")
+    st.write(f"Creating environment using: {env_path}")
     custom_env = Environment(
         
         name="lstm_training_env",
         description="Custom environment for LSTM training",
         # Use a reliable base image that always exists
         image="mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest",
-        conda_file=conda_file_path,
+        conda_file=env_path,
     )
     ################### update to fix relative path issues
 
