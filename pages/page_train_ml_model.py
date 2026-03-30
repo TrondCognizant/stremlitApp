@@ -105,7 +105,7 @@ if not os.path.exists(local_src_path):
 # 3. Register the Code Asset using the dynamic path
 try:
     st.info("Uploading source code from current session...")
-    my_code = CodeConfiguration(path=local_src_path)
+    my_code = CodeConfiguration(code=local_src_path)
     uploaded_code = ml_client.code.create_or_update(my_code)
     code_id = uploaded_code.id
     st.success("✅ Code uploaded successfully!")
