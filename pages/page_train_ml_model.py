@@ -93,7 +93,8 @@ hidden_nodes = st.slider("Number of neurons (hidden nodes)", 1, 5)
 # This will automatically handle the '8de89b...' vs '8de88d...' change
 current_page_dir = os.path.dirname(os.path.abspath(__file__))
 local_src_path = os.path.join(current_page_dir, "src")
-
+# Instead of hardcoding /tmp/...
+env_path = os.path.join(current_page_dir, "src", "environment.yml")
 st.write(f"📂 Current Session Directory: `{current_page_dir}`")
 
 # 2. Safety Check
@@ -102,27 +103,11 @@ if not os.path.exists(local_src_path):
     st.info(f"Existing items in this folder: {os.listdir(current_page_dir)}")
     st.stop()
 
-# 3. Register the Code Asset using the dynamic path
-try:
-    st.info("Uploading source code from current session...")
-    my_code = CodeConfiguration(code=local_src_path)
-    uploaded_code = ml_client.code.create_or_update(my_code)
-    code_id = uploaded_code.id
-    st.success("✅ Code uploaded successfully!")
-except Exception as e:
-    st.error(f"Upload failed: {e}")
-    st.stop()
-    
-# Instead of hardcoding /tmp/...
-env_path = os.path.join(current_page_dir, "src", "environment.yml")
-
-
 if st.button("Start Training Job"):
  
      # 2. Define the Environment object
     st.write(f"Creating environment using: {env_path}")
-    custom_env = Environment(
-        
+    custom_env = Environment( 
         name="lstm_training_env",
         description="Custom environment for LSTM training",
         # Use a reliable base image that always exists
@@ -143,30 +128,15 @@ if st.button("Start Training Job"):
         st.error(f"Environment registration failed: {e}")
         st.stop()
 
-    # 2. Define the local path clearly
-    # Verify this path exists in your Streamlit environment
-    local_src_path = "/tmp/8de88dedfddf46b/pages/src"
 
     if not os.path.exists(local_src_path):
         st.error(f"🚨 Path does not exist: {local_src_path}")
         st.stop()
 
-    # 3. Manually register the code asset
-    # This forces the SDK to upload the folder to Azure Storage immediately
-    try:
-        st.info("Uploading source code to Azure Storage...")
-        my_code = CodeConfiguration(path=local_src_path)
-        uploaded_code = ml_client.code.create_or_update(my_code)
-        
-        # We now have a clean Azure Resource ID (it starts with /subscriptions/...)
-        code_id = uploaded_code.id
-        st.success("✅ Code uploaded successfully.")
-    except Exception as e:
-        st.error(f"Failed to upload code: {e}")
-        st.stop()
+
         # 3. Submit the Job using ONLY the ID strings
     job = command(
-        code=code_id,  # <--- Use the ID from the upload above
+        code=local_src_path, #code_id,  # <--- Use the ID from the upload above
         command="python train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
         inputs={"hidden_nodes": 1},
         environment=env_id, # Use the registered_env.id from our previous step
