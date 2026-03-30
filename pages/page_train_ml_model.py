@@ -105,7 +105,7 @@ if not os.path.exists(local_src_path):
 # 3. Register the Code Asset using the dynamic path
 try:
     st.info("Uploading source code from current session...")
-    my_code = Code(path=local_src_path)
+    my_code = CodeConfiguration(path=local_src_path)
     uploaded_code = ml_client.code.create_or_update(my_code)
     code_id = uploaded_code.id
     st.success("✅ Code uploaded successfully!")
@@ -117,12 +117,6 @@ except Exception as e:
 env_path = os.path.join(current_page_dir, "src", "environment.yml")
 
 
-if not os.path.exists(code_dir):
-    # Fallback for local testing
-    code_dir = os.path.abspath("./src")
-
-st.write(f"Uploading code from: {code_dir}")
-st.write(f"Code_dir content: {os.listdir(code_dir)}")
 if st.button("Start Training Job"):
  
      # 2. Define the Environment object
