@@ -128,11 +128,9 @@ if st.button("Start Training Job"):
         st.error(f"Environment registration failed: {e}")
         st.stop()
 
-
     if not os.path.exists(local_src_path):
         st.error(f"🚨 Path does not exist: {local_src_path}")
         st.stop()
-
 
         # 3. Submit the Job using ONLY the ID strings
     job = command(
@@ -143,15 +141,6 @@ if st.button("Start Training Job"):
         compute="Standard-D4s-v3-cluster-694450",
         experiment_name="lstm-training-webapp"
     )
-    # 3. Build the Job using STRINGS, not objects
-    """job = command(
-        code=local_code_path, # Pure string path
-        command="python train_lstm.py --hidden_nodes ${{inputs.hidden_nodes}}",
-        inputs={"hidden_nodes": 1},
-        environment=env_id,   # Using the ID string from Step 1
-        compute="Standard-D4s-v3-cluster-694450",
-        experiment_name="lstm-training-webapp"
-    )"""
 
     # 4. Final Submission
     try:
@@ -162,38 +151,11 @@ if st.button("Start Training Job"):
     except Exception as e:
         st.error("Submission failed. Check the error below:")
         st.code(str(e))
-        ####################
-        """ 
-        job = command(
-            name=f"lstm-train-{int(time.time())}", # Add a unique name
-            code=code_dir, 
-            inputs={"hidden_nodes": hidden_nodes},
-            command="python3 train_lstm.py --hidden_nodes 5", # ${{inputs.hidden_nodes}}",
-            environment=custom_env, # "AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest",
-            compute=compute_name
-        )"""
+ 
+
         
     
-    try:
-        st.info(f"Submitting job from: {code_dir}")
-        st.write("Checking job attributes before submission...")
-        # This line will tell us if any attribute is missing before we even send it
-        st.json(job._to_dict())
-        returned_job = ml_client.jobs.create_or_update(job)
-        st.success(f"Job created! ID: {returned_job.name}")
 
-    except Exception as e:
-        st.error(f"### Job Submission Failed")
-        
-        # This is the most reliable way to show the error message in Python 3.12
-        error_msg = str(e)
-        st.code(error_msg)
-        
-        # Logical check for common issues
-        if "AssetException" in error_msg or "upload" in error_msg.lower():
-            st.warning("⚠️ **Diagnosis:** The SDK is failing to zip or upload the 'src' folder.")
-            st.info("This usually happens because the Web App identity lacks 'Storage Blob Data Contributor' "
-                    "permissions on the workspace storage account.")
             
 
 
